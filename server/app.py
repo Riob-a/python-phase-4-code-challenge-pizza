@@ -27,14 +27,17 @@ def index():
 @app.route('/restaurants', methods=['GET'])
 def get_restaurants():
     restaurants = Restaurant.query.all()
-    return jsonify([restaurant.to_dict() for restaurant in restaurants]), 200
+    response = make_response(jsonify([restaurant.to_dict() for restaurant in restaurants]), 200)
+    return response
 
 @app.route('/restaurants/<int:id>', methods=['GET'])
 def get_restaurant(id):
     restaurant = Restaurant.query.get(id)
     if restaurant:
-        return jsonify(restaurant.to_dict(include_pizzas=True)), 200
-    return jsonify({'error': 'Restaurant not found'}), 404
+        response = make_response(jsonify(restaurant.to_dict(include_pizzas=True)), 200)
+    else:
+        response = make_response(jsonify({'error': 'Restaurant not found'}), 404)
+    return response
 
 @app.route('/restaurants/<int:id>', methods=['DELETE'])
 def delete_restaurant(id):
@@ -42,13 +45,16 @@ def delete_restaurant(id):
     if restaurant:
         db.session.delete(restaurant)
         db.session.commit()
-        return '', 204
-    return jsonify({'error': 'Restaurant not found'}), 404
+        response = make_response('', 204)
+    else:
+        response = make_response(jsonify({'error': 'Restaurant not found'}), 404)
+    return response
 
 @app.route('/pizzas', methods=['GET'])
 def get_pizzas():
     pizzas = Pizza.query.all()
-    return jsonify([pizza.to_dict() for pizza in pizzas]), 200
+    response = make_response(jsonify([pizza.to_dict() for pizza in pizzas]), 200)
+    return response
 
 @app.route('/restaurant_pizzas', methods=['POST'])
 def create_restaurant_pizza():
@@ -61,10 +67,10 @@ def create_restaurant_pizza():
         )
         db.session.add(restaurant_pizza)
         db.session.commit()
-        return jsonify(restaurant_pizza.to_dict(include_pizza=True, include_restaurant=True)), 201
+        response = make_response(jsonify(restaurant_pizza.to_dict(include_pizza=True, include_restaurant=True)), 201)
     except ValueError:
-        return jsonify({'errors': ['validation errors']}), 400
-
+        response = make_response(jsonify({'errors': ['validation errors']}), 400)
+    return response
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)
