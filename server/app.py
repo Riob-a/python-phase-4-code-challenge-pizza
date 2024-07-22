@@ -14,11 +14,8 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.json.compact = False
 
 migrate = Migrate(app, db)
-
 db.init_app(app)
-
 api = Api(app)
-
 
 @app.route("/")
 def index():
@@ -32,7 +29,7 @@ def get_restaurants():
 
 @app.route('/restaurants/<int:id>', methods=['GET'])
 def get_restaurant(id):
-    restaurant = Restaurant.query.get(id)
+    restaurant = db.session.get(Restaurant, id)
     if restaurant:
         response = make_response(jsonify(restaurant.to_dict(include_pizzas=True)), 200)
     else:
@@ -41,7 +38,7 @@ def get_restaurant(id):
 
 @app.route('/restaurants/<int:id>', methods=['DELETE'])
 def delete_restaurant(id):
-    restaurant = Restaurant.query.get(id)
+    restaurant = db.session.get(Restaurant, id)
     if restaurant:
         db.session.delete(restaurant)
         db.session.commit()
